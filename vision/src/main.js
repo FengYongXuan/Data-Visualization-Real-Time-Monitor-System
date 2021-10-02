@@ -3,6 +3,8 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from 'axios'
+// 引入全局的样式文件
+import './assets/css/global.less'
 
 // 请求基准路径的配置
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/'
