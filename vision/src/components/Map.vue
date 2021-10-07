@@ -29,7 +29,7 @@ export default {
     async initChart () {
       this.chartInstance = this.$echarts.init(this.$refs.map_ref, 'chalk')
       // 获取中国地图的矢量数据
-      const ret = await axios.get('http://localhost:8081/static/map/china.json')
+      const ret = await axios.get('http://localhost:8082/static/map/china.json')
       this.$echarts.registerMap('china', ret.data)
       const initOption = {
         title: {
@@ -60,7 +60,7 @@ export default {
         // 获取这个省份的地图矢量数据
         // 判断当前所点击的这个省份的地图矢量数据在mapData中是否存在，防止重复请求
         if (!this.mapData[provinceInfo.key]) {
-          const ret = await axios.get('http://localhost:8081' + provinceInfo.path)
+          const ret = await axios.get('http://localhost:8082' + provinceInfo.path)
           this.mapData[provinceInfo.key] = ret.data
           this.$echarts.registerMap(provinceInfo.key, ret.data)
         }
