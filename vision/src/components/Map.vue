@@ -16,20 +16,31 @@ export default {
       mapData: {} // 所获取的地图矢量数据
     }
   },
+  created () {
+    // 在组件创建完成之后进行回调函数的注册
+    this.$socket.registerCallBack('mapData', this.getData)
+  },
   mounted () {
     this.initChart()
-    this.getData()
+    // 发送数据给服务器，告诉服务器我现在需要数据
+    this.$socket.send({
+      action: 'getData',
+      socketType: 'mapData',
+      chartName: 'map',
+      value: ''
+    })
     window.addEventListener('resize', this.screenAdapter)
     this.screenAdapter()
   },
   destroyed () {
     window.removeEventListener('resize', this.screenAdapter)
+    this.$socket.unRegisterCallBack('mapData')
   },
   methods: {
     async initChart () {
       this.chartInstance = this.$echarts.init(this.$refs.map_ref, 'chalk')
       // 获取中国地图的矢量数据
-      const ret = await axios.get('http://localhost:8082/static/map/china.json')
+      const ret = await axios.get('http://localhost:8083/static/map/china.json')
       this.$echarts.registerMap('china', ret.data)
       const initOption = {
         title: {
@@ -60,7 +71,7 @@ export default {
         // 获取这个省份的地图矢量数据
         // 判断当前所点击的这个省份的地图矢量数据在mapData中是否存在，防止重复请求
         if (!this.mapData[provinceInfo.key]) {
-          const ret = await axios.get('http://localhost:8082' + provinceInfo.path)
+          const ret = await axios.get('http://localhost:8083' + provinceInfo.path)
           this.mapData[provinceInfo.key] = ret.data
           this.$echarts.registerMap(provinceInfo.key, ret.data)
         }
@@ -72,9 +83,8 @@ export default {
         this.chartInstance.setOption(changeOption)
       })
     },
-    async getData () {
+    getData (ret) {
       // 获取服务器的数据，对this.allData进行赋值之后，调用updateChart方法更新图表
-      const { data: ret } = await this.$http.get('map')
       this.allData = ret
       this.updateChart()
     },

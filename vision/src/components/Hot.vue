@@ -17,6 +17,10 @@ export default {
       titleFontSize: 0
     }
   },
+  created () {
+    // 在组件创建完成之后进行回调函数的注册
+    this.$socket.registerCallBack('hotData', this.getData)
+  },
   computed: {
     catName () {
       if (!this.allData) {
@@ -33,12 +37,19 @@ export default {
   },
   mounted () {
     this.initChart()
-    this.getData()
+    // 发送数据给服务器，告诉服务器我现在需要数据
+    this.$socket.send({
+      action: 'getData',
+      socketType: 'hotData',
+      chartName: 'hot',
+      value: ''
+    })
     window.addEventListener('resize', this.screenAdapter)
     this.screenAdapter()
   },
   destroyed () {
     window.removeEventListener('resize', this.screenAdapter)
+    this.$socket.unRegisterCallBack('hotData')
   },
   methods: {
     initChart () {
@@ -90,9 +101,8 @@ export default {
       }
       this.chartInstance.setOption(initOption)
     },
-    async getData () {
+    getData (ret) {
       // 获取服务器的数据，对this.data进行赋值之后，调用updateChart方法更新图表
-      const { data: ret } = await this.$http.get('hotproduct')
       this.allData = ret
       this.updateChart()
     },

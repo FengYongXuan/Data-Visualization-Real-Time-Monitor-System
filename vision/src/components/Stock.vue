@@ -15,14 +15,25 @@ export default {
       timerId: null // 定时器的标识
     }
   },
+  created () {
+    // 在组件创建完成之后进行回调函数的注册
+    this.$socket.registerCallBack('stockData', this.getData)
+  },
   mounted () {
     this.initChart()
-    this.getData()
+    // 发送数据给服务器，告诉服务器我现在需要数据
+    this.$socket.send({
+      action: 'getData',
+      socketType: 'stockData',
+      chartName: 'stock',
+      value: ''
+    })
     window.addEventListener('resize', this.screenAdapter)
     this.screenAdapter()
   },
   destroyed () {
     window.removeEventListener('resize', this.screenAdapter)
+    this.$socket.unRegisterCallBack('stockData')
     clearInterval(this.timerId)
   },
   methods: {
@@ -43,9 +54,8 @@ export default {
         this.startInterval()
       })
     },
-    async getData () {
+    getData (ret) {
       // 获取服务器的数据，对this.allData进行赋值之后，调用updateChart方法更新图表
-      const { data: ret } = await this.$http.get('stock')
       this.allData = ret
       this.updateChart()
       this.startInterval()
