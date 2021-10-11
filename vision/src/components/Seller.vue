@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   data () {
     return {
@@ -42,7 +43,7 @@ export default {
   methods: {
     // 初始化echartInstance对象
     initChart () {
-      this.chartInstance = this.$echarts.init(this.$refs.seller_ref, 'chalk')
+      this.chartInstance = this.$echarts.init(this.$refs.seller_ref, this.theme)
       // 对图表初始化配置的控制
       const initOption = {
         title: {
@@ -114,7 +115,6 @@ export default {
     // 获取服务器的数据
     getData (ret) {
       this.allData = ret
-      console.log(ret)
       // 对数据排序
       this.allData.sort((a, b) => {
         return a.value - b.value // 从小到大排序
@@ -191,10 +191,20 @@ export default {
       // 手动调用图表对象的resize才能产生效果
       this.chartInstance.resize()
     }
+  },
+  computed: {
+    ...mapState(['theme'])
+  },
+  watch: {
+    theme () {
+      this.chartInstance.dispose() // 销毁当前的图表
+      this.initChart() // 重新以最新的主题名称初始化图表对象
+      this.screenAdapter() // 完成屏幕的适配
+      this.updateChart() // 更新图表的展示
+    }
   }
 }
 </script>
 
 <style>
-
 </style>

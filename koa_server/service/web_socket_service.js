@@ -26,7 +26,7 @@ module.exports.listen = () => {
         // 原封不动地将所接收到的数据转发给每一个处于连接状态的客户端
         // wss.clients 所有客户端的连接
         wss.clients.forEach(client => {
-          client.send(msg)
+          client.send(JSON.stringify(payload))
         })
       }
     })
